@@ -25,7 +25,9 @@ class RouteDispatcher
 
         parse_str($query, $params);
 
-        $routes = Config::get('routes');
+        $routes = Config::get('routes'); # todo: idea: refactor 'routes' and other
+                                         #       hardcoded strings to be constants used here
+                                         #       and in routes.php/controllers.php
         if (!array_key_exists($path, $routes)) {
             $path = '/404';
         }

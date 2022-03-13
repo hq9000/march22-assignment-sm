@@ -56,6 +56,10 @@ abstract class AbstractCalculator implements CalculatorInterface
     }
 
     /**
+     *
+     * todo: refactoring idea: rename to something like "postShouldBeConsidered"
+     *       as otherwise it is a bit unclear what it does based just on the name.
+     *
      * @param SocialPostTo $postTo
      *
      * @return bool

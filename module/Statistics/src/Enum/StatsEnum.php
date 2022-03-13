@@ -7,7 +7,7 @@ namespace Statistics\Enum;
  *
  * @package Statistics\Enum
  */
-class StatsEnum
+class StatsEnum # todo: refactoring idea: make it a enum once on 8.1
 {
 
     public const AVERAGE_POST_LENGTH = 'average-character-length';
