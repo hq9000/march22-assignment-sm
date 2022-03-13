@@ -1,12 +1,21 @@
 <?php
 
+/**
+ * This script:
+ * 1. takes a email from request (using `unknown` if impossible to fetch it from request)
+ * 2. looks up the corresponding username record in the db and prints it out
+ *
+ */
+
 const REQUEST_KEY_EMAIL        = 'email';
 const REQUEST_KEY_MASTER_EMAIL = 'masterEmail';
 
-const MYSQL_PASSWORD = 'sldjfpoweifns'; // todo: consider taking it from env
-const MYSQL_USERNAME = 'root'; // todo: consider taking it from env
-const MYSQL_HOST     = 'localhost'; // todo: consider taking it from env
-const MYSQL_DATABASE = 'my_database'; // todo: consider taking it from env
+// todo: consider taking mysql credentials from environment variables
+const MYSQL_PASSWORD = 'sldjfpoweifns';
+const MYSQL_USERNAME = 'root';
+const MYSQL_HOST     = 'localhost';
+const MYSQL_PORT     = 3306;
+const MYSQL_DATABASE = 'my_database';
 
 const UNKNOWN_EMAIL_KEYWORD_IN_DATABASE = 'unknown';
 
@@ -15,11 +24,11 @@ const COLUMN_NAME_USERNAME = 'username';
 const TABLE_NAME_USERS     = 'users';
 
 /**
- * Extracts email to look for from $_REQUEST
+ * Extracts email to be used for lookup from $_REQUEST
  *
  * @return string
  */
-function extractEmailFromRequest(): string
+function extractMasterEmailFromRequest(): string
 {
     $masterEmail = $_REQUEST[REQUEST_KEY_EMAIL] ?? null;
 
@@ -35,7 +44,7 @@ function extractEmailFromRequest(): string
 }
 
 /**
- * throws if string does not contain a valid email
+ * throws if string does not contain a valid email.
  *
  * @param string $email
  *
@@ -43,16 +52,20 @@ function extractEmailFromRequest(): string
  */
 function validateEmail(string $email)
 {
+    if (UNKNOWN_EMAIL_KEYWORD_IN_DATABASE === $email) {
+        // the "unknown" is considered a valid email entry
+        return;
+    }
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         throw new Exception('invalid email');
     }
 }
 
-$masterEmail = extractEmailFromRequest();
+$masterEmail = extractMasterEmailFromRequest();
 validateEmail($masterEmail);
-echo 'The master email is ' . $masterEmail . '\n';
+echo "The master email is " . $masterEmail . "\n";
 
-$conn = mysqli_connect(MYSQL_HOST, MYSQL_USERNAME, MYSQL_PASSWORD, MYSQL_DATABASE);
+$mysqli = new mysqli(MYSQL_HOST, MYSQL_USERNAME, MYSQL_PASSWORD, MYSQL_DATABASE, MYSQL_PORT);
 
 $query = implode(
     ' ',
@@ -62,14 +75,25 @@ $query = implode(
         'FROM',
         TABLE_NAME_USERS,
         'WHERE',
-        COLUMN_NAME_EMAIL . '=',
-        '\'' . mysqli_real_escape_string($conn, $masterEmail) . '\'',
+        COLUMN_NAME_EMAIL . '=?',
     ]
 );
 
-$res = mysqli_query(
-    $conn, $query
-);
+// using prepared statement as less performant but
+// more secure alternative to escaping
+$statement = $mysqli->prepare($query);
+if (!$statement) {
+    throw new Exception('unable to create a statement: ' . $mysqli->error);
+}
 
-$row = mysqli_fetch_row($res);
-echo $row[COLUMN_NAME_USERNAME] . "\n";
+$statement->bind_param("s", $masterEmail);
+$res = $statement->execute();
+
+$statement->bind_result($resultUsername);
+$row = $statement->fetch();
+$mysqli->close(); // optional, but good to have
+
+if ($row) {
+    echo $resultUsername;
+}
+
