@@ -12,6 +12,7 @@ class AveragePostsNumberPerUser extends AbstractCalculator
 
     protected const UNITS = 'posts';
 
+
     private int $postCount = 0;
 
     /**
@@ -20,6 +21,17 @@ class AveragePostsNumberPerUser extends AbstractCalculator
      * contains a map of unique user_id values to true
      */
     private array $usersMap = [];
+
+    protected function checkPost(SocialPostTo $postTo): bool
+    {
+        // for the purpose of this calculator, we ignore posts not attributed to
+        // any user
+        if ($postTo->getAuthorId() === null) {
+            return false;
+        }
+        return parent::checkPost($postTo);
+    }
+
 
     protected function doAccumulate(SocialPostTo $postTo): void
     {
