@@ -21,7 +21,7 @@ class StatisticsCalculatorFactoryTest extends TestCase
         // empty statistics there.
         // Alternatively, we could have added a "getChildren" method to CalculatorComposite
         $res                 = $calculatorComposite->calculate();
-        $this->assertCount(2, $res->getChildren());
+        $this->assertCount(1, $res->getChildren());
         $this->assertEquals(StatsEnum::AVERAGE_POST_NUMBER_PER_USER, $res->getChildren()[0]->getName());
     }
 }
