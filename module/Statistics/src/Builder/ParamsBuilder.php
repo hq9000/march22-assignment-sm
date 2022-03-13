@@ -23,6 +23,7 @@ class ParamsBuilder
     {
         $startDate = (clone $date)->modify('first day of this month');
         $endDate   = (clone $date)->modify('last day of this month');
+        $endDate->modify('+1 day');
 
         return [
             (new ParamsTo())

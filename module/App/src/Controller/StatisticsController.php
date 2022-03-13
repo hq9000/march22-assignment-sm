@@ -89,6 +89,7 @@ class StatisticsController extends Controller
     {
         $month = $params['month'] ?? null;
         $date  = DateTime::createFromFormat('F, Y', $month);
+        $date->setTime(0, 0, 0, 0);
 
         if (false === $date) {
             $date = new DateTime();
