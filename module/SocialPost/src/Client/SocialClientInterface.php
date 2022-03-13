@@ -7,7 +7,7 @@ namespace SocialPost\Client;
  *
  * @package SocialPost\Client
  */
-interface SocialClientInterface # todo: refactoring: SocialApiClientInterface might be a better name
+interface SocialClientInterface
 {
 
     /**
